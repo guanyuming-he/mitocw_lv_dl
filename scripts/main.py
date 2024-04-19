@@ -43,10 +43,12 @@ def start_download(
 
 # Import courses
 import courses.c6004y2017
+import courses.c1802scy2010
 
 # Maps <course-number>-<year> to (populate_video_maps_list,  youtube_available)
 COURSE_MAP:dict = dict()
 COURSE_MAP["6.004-2017"] = (courses.c6004y2017.populate_video_maps_list, courses.c6004y2017.youtube_available)
+COURSE_MAP["6.18.02sc-2010"] = (courses.c1802scy2010.populate_video_maps_list, courses.c1802scy2010.youtube_available)
 
 # Maps name to YouTube downloaders
 YT_DL_MAP:dict = dict()

@@ -2,6 +2,13 @@ import pathlib
 import bs4
 import json
 
+def get_youtube_url_from_video_tag(tag: bs4.Tag) -> str:
+    youtube_data_JSON:str = tag["data-setup"]
+    yt_data_map:dict = json.loads(youtube_data_JSON)
+    src:list = yt_data_map["sources"]
+    src_0 = src[0]
+    return src_0["src"]
+
 def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = False) -> list:
 
     if(not static_root_path.exists() or not static_root_path.is_dir()):
@@ -69,13 +76,7 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
             assert(youtube_video_tag is not None)
 
             # the youtube video source data is stored in JSON
-            youtube_data_JSON:str = youtube_video_tag["data-setup"]
-            yt_data_map:dict = json.loads(youtube_data_JSON)
-            src:list = yt_data_map["sources"]
-            src_0 = src[0]
-            youtube_URL:str = src_0["src"]
-
-            videos_map[video_title] = youtube_URL
+            videos_map[video_title] = get_youtube_url_from_video_tag(youtube_video_tag)
 
         video_maps_list.append(videos_map)
 
