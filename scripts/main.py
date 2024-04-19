@@ -31,7 +31,14 @@ def start_download(
         downloader.chdir(lecture_video_dir)
 
         video_map:dict = lecture_video_maps[i]
+        title:str
         for (title, url) in video_map.items():
+            # Replace illegal filename characters with #
+            title = title.replace('/', '#')
+            title = title.replace(':', '#')
+            title = title.replace('\"', '#')
+            title = title.replace('?', '#')
+            title = title.replace('*', '#')
             downloader.download(title, url, verbose)
 
 # Import courses
