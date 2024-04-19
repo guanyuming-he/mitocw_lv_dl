@@ -19,9 +19,8 @@ In this section, I will comprehensively list all the requirements for the script
 
 ## Requirements
 
-- First, the scripts must be able to download the bundled course resource given the link to that course on MIT OCW.
-- Then, the scripts must be able to extract the contents into a subdirectory inside a user designated local directory, say `.../d/static`, where `.../d` is the path to the user designated directory `d`, and the files are extracted into a new directory `static` inside it.
-- Besides, the scripts will create another directory `.../d/lectures` to store the downloaded lecture videos.
+- Assume the user has downloaded the bundled resource and extracted the contents into `.../d/<static>`, where `.../d` is a path to a user designated directory, and `<static>` is anything other than `lectures`
+- The scripts will create a directory `.../d/lectures` to store the downloaded lecture videos.
 - For each course, the scripts must be able to find all videos that a human can find by looking at the webpages downloaded.
 - If there are no videos for the course, then the scripts finish.
 - For these videos, the scripts must be able to download all of them in such a way
@@ -37,14 +36,14 @@ In this subsection, I will explain how the scripts satisfy the requirements.
 
 - The scripts are written in Python, version 3.
 
-- To abstract the downloading process of a given URL and title, I define absstract class `video_downloader`
+- To abstract the downloading process of a given URL and title, I define an abstract class `video_downloader` that
     - has a field `__dir: pathlib.Path` and another `__dir_filenames: set` that contains all filenames in the dir.
     - has a method `chdir(new_dir: pathlib.Path)` that sets `__dir` to an existing `new_dir` ajd build `__dir_filenames`.
-    - has an abstract method `download(url: str, title: str)` that downloads video indicated by `url` into `dir` as a file named by `title`. 
+    - has an abstract method `download(title: str, url: str)` that downloads video indicated by `url` into `dir` as a file named by `title`. 
         - If there is already a file with that name (any extension is okay, so that means if the title is in `__dir_filenames`), then the download call does nothing. 
         - After a successful download, the method adds title to `__dir_filenames`.
 
-- There is a central function 
+- There is a central function inside `main.py`: 
 `start_download(lecture_video_maps: list, lecture_videos_root: pathlib.Path, downloader: video_downloader)`.
     - Argument `lecture_video_maps` is a `list`: $[m_l \mid l \in L]$, where
         - $L$ is the set of all lectures
@@ -58,3 +57,18 @@ In this subsection, I will explain how the scripts satisfy the requirements.
         - A directory `lecture_videos_root/Lecture i+1` is created if it does not exist.
         - calls `downloader.chdir()` on that directory
         - calls `downloader.download()` for each pair in `lecture_video_maps[i]`.
+
+- For each course, a script named with the `<course-number>-<year>.py` is written. Inside the script, 
+    - there is a function `populate_video_maps_list(static_root_path: pathlib.Path)` that returns a list of video maps that can is to be fed into `start_download()`. `static_root_path` is a path to the root of the extracted contents of a bundled download.
+    - there is another function `youtube_available()` that returns a boolean to indicate if the videos for this course are available on YouTube.
+
+- The rest of `main.py` is executed when it is executed. That is, the rest acts like a `main()` function in C. The user should supply these things to the script as command-line arguments:
+    - Which course videos to download. It is in this format: `<course-number>-<year>`.
+    - A path to the directory where the contents of the bundled course content is extracted into. It can be an absolute path or relative path, as it will be passed to a `pathlib.Path` constructor.
+    - A string that uniquely identifies a type of downloader to download YouTube videos if they are avialable.
+        - For now, only `yt-dlp` is supported.
+    - A string that is either True or False to indicate the verbose level.
+
+- `main.py` maintains a map that maps `c<course-number>y<year>` to the `populate_video_maps_list()` defined in `<course-number>-<year>.py`. It maintains another map that maps the names of the YouTube downloaders to instances of the downloaders.
+
+- When the rest is executed, `main.py` selects the corresponding `populate_video_maps_list()` and `video_downloader` from the two maps. It then passes them as well as the path given to `start_download()`, and then executes it.
