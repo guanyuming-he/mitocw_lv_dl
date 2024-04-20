@@ -9,18 +9,15 @@ def get_youtube_url_from_video_tag(tag: bs4.Tag) -> str:
     src_0 = src[0]
     return src_0["src"]
 
-def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = False) -> list:
-
-    if(not static_root_path.exists() or not static_root_path.is_dir()):
-        raise ValueError("static_root_path does not exist or is not a directory.")
-    
-    # 1. to fill the video_maps_list, first I must find all video .html file for each lecture.
-    # In this course, the title of a video is also available where the .html file path is stored.
-    # This list:
-    # lecture index -> {title |-> html path}
+def find_videos_from_index_html(lv_ind_html_path: pathlib.Path) -> list:
+    """
+    In this course, videos are listed on an index .html file.
+    Lecture videos are listed on a lecture index .html, and recitations are listed on another.
+    Therefore, this function, when given such a .html, finds all videos and populates a list 
+    in required format: index -> {title |-> html path}
+    """
     video_title_html_path_maps_list = []
 
-    lv_ind_html_path = static_root_path / "resources" / "lecture-videos" / "index.html";
     assert(lv_ind_html_path.exists() and lv_ind_html_path.is_file())
 
     lv_ind_html = open(lv_ind_html_path)
@@ -45,7 +42,23 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
         # Therefore, the session number can be obtained from it.
         session_str_ind:int = title.find("Session")
         clip_str_ind:int = title.find("Clip")
-        session_num_title:int = int(title[session_str_ind+8:clip_str_ind-1])
+        session_num_title:int
+        # If the Clip is in the title, then the number is this way in the title:
+        # Session SPACE number SPACE Clip
+        if(session_str_ind != -1 and clip_str_ind != -1):
+            session_num_title = int(title[session_str_ind+8:clip_str_ind-1])
+        # If we can't find the Clip str, then find if it's two digits or one digit
+        elif (session_str_ind != -1):
+            # Decide if the number has one character (< 10) or has two (>= 10 & <= 99)
+            two_numbers_str = title[session_str_ind+8:session_str_ind+10]
+            if(two_numbers_str.isdigit()):
+                session_num_title = int(two_numbers_str)
+            # one digit
+            else:
+                session_num_title = int(two_numbers_str[0])
+        # Might be an introduction with no session in the title.
+        else:
+            session_num_title = 1
 
         # The path contained in href attribute is relative to lv_ind_html_path
         relative_path:str = list_item_details_a["href"]
@@ -73,11 +86,30 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
             # the youtube video source data is stored in JSON
             map[title] = get_youtube_url_from_video_tag(video_tag)
 
+    return video_title_html_path_maps_list
+
+def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = False) -> list:
+
+    if(not static_root_path.exists() or not static_root_path.is_dir()):
+        raise ValueError("static_root_path does not exist or is not a directory.")
+    
+    # Lecture videos list
+    lv_ind_html_path = static_root_path / "resources" / "lecture-videos" / "index.html";
+    l_video_title_html_path_maps_list = find_videos_from_index_html(lv_ind_html_path)
+
+    # Recitation videos list
+    rv_ind_html_path = static_root_path / "resources" / "recitation-videos" / "index.html";
+    r_video_title_html_path_maps_list = find_videos_from_index_html(rv_ind_html_path)
+
     # 3 verbose output
     if (verbose):
-        print(video_title_html_path_maps_list)
+        print("Lecture videos:")
+        print(l_video_title_html_path_maps_list)
+        print("Recitation videos:")
+        print(r_video_title_html_path_maps_list)
 
-    return video_title_html_path_maps_list
+    return {"Lecture": l_video_title_html_path_maps_list, 
+            "Recitation": r_video_title_html_path_maps_list} 
  
 def youtube_available() -> bool:
     return True
