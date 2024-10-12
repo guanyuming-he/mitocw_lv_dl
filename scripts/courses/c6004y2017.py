@@ -39,6 +39,7 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
 
     i0 = 0
     for i0 in range(NUM_LECTURERS):
+        # Lecture index starts from 1
         i = i0+1
 
         videos_map = {}
@@ -77,7 +78,7 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
 
             videos_map[video_title] = youtube_URL
 
-        video_maps_list.append(videos_map)
+        video_maps_list.append((i, videos_map))
 
     if(verbose):
         print("video_maps_list=")

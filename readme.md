@@ -46,8 +46,8 @@ In this subsection, I will explain how the scripts satisfy the requirements.
 - There is a central function inside `main.py`: 
 `start_download(lecture_video_maps: list, lecture_videos_root: pathlib.Path, downloader: video_downloader)`.
     - Argument `lecture_video_maps` is a `list`: $[m_l \mid l \in L]$, where
-        - $L$ is the set of all lectures
-        - $m_l$ is a mapping (`dict`): $\{t \mapsto u\}$, where $t$ is the title of a video, and $u$ is the URL to that video.
+        - $L$ is the set of all lecture numbers.
+        - $m_l$ is a 2-tuple, whose first element is `l`, and whose second element is a mapping (`dict`): $\{t \mapsto u\}$, where $t$ is the title of a video, and $u$ is the URL to that video.
         - $m_l$'s are stored in the order of the lectures.
         - If `lecture_video_maps` is empty, then the function will throw some exception (TBA).
         - If any `dict` in the `list` is empty, then the function will throw some exception (TBA).

@@ -7,7 +7,35 @@ def start_download(
     downloader: video_downloader.video_downloader,
     verbose:bool = False
 ) -> None:
-    
+    """
+    Download all videos in lecture_video_maps into lecture_videos_root,
+    creating a subdirectory for each lecture.
+    The downloading will be done using downloader.
+
+        Parameters:
+            lecture_video_maps (list): list of maps. 
+                Each element in the list is a 2-tuple,
+                whose first element is the lecture number,
+                and whose second element map that maps titles to video urls for a lecture.
+                The maps are arranged in the order the lectures are given.
+            lecture_videos_root (pathlib.Path):
+                Path to the directory where the lectures
+                are going to be downloaded.
+            downloader:
+                The ADT that handles the downloading.
+
+        Requires:
+            The maps is not empty; the video urls are valid.
+            The videos_root exists.
+            downloader is valid.
+
+        Ensures:
+            Exactly as said in the description.
+            The videos will be created with the corresponding keys in the maps
+            as their filename, with illegal characters in NTFS replaced by #,
+            in case the scripts are executed on Windows.
+            Will only output extra information if verbose=True
+    """
     if len(lecture_video_maps) == 0:
         raise ValueError("The video maps list is empty.")
     if not lecture_videos_root.exists() or not lecture_videos_root.is_dir():
@@ -16,8 +44,10 @@ def start_download(
         raise ValueError("The downloader is none.")
     
     for i in range(len(lecture_video_maps)):
-        # Lectures are indexed from 1
-        li = i+1
+        # Lecture number
+        li = lecture_video_maps[i][0]
+        # Lecture video map
+        video_map:dict = lecture_video_maps[i][1]
 
         if (verbose):
             print("downloading videos for lecture " + str(li))
@@ -30,7 +60,6 @@ def start_download(
 
         downloader.chdir(lecture_video_dir)
 
-        video_map:dict = lecture_video_maps[i]
         title:str
         for (title, url) in video_map.items():
             # Replace illegal filename characters with #
@@ -43,10 +72,12 @@ def start_download(
 
 # Import courses
 import courses.c6004y2017
+import courses.c18065y2018
 
 # Maps <course-number>-<year> to (populate_video_maps_list,  youtube_available)
 COURSE_MAP:dict = dict()
 COURSE_MAP["6.004-2017"] = (courses.c6004y2017.populate_video_maps_list, courses.c6004y2017.youtube_available)
+COURSE_MAP["18.065-2018"] = (courses.c18065y2018.populate_video_maps_list, courses.c18065y2018.youtube_available)
 
 # Maps name to YouTube downloaders
 YT_DL_MAP:dict = dict()
