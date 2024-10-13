@@ -116,9 +116,10 @@ if(COURSE_MAP[COURSE_ID_ARG][1]()): # If youtube videos are available
         exit(-1)
     downloader = YT_DL_MAP[YT_DL_ID]
 else: # youtube videos are not available. Fallback to 300k downloader
-    raise NotImplemented("Not implemented yet.")
+    downloader = video_downloader,default_300k_downloader()
 
 VERBOSE:bool = str(COMMAND_ARGS[3])
 
 # Execute the download
 start_download(COURSE_VIDEO_MAPS_POPULATOR(STATIC_ROOT, VERBOSE), LECTURE_VIDEOS_ROOT, downloader, VERBOSE)
+
