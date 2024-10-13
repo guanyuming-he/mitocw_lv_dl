@@ -84,7 +84,8 @@ import courses.c1806scy2011
 COURSE_MAP:dict = dict()
 COURSE_MAP["6.004-2017"] = (courses.c6004y2017.populate_video_maps_list, courses.c6004y2017.youtube_available)
 COURSE_MAP["18.065-2018"] = (courses.c18065y2018.populate_video_maps_list, courses.c18065y2018.youtube_available)
-COURSE_MAP["18.06-2011"] = (courses.c1806scy2011.populate_video_maps_list, courses.c1806scy2011.youtube_available)
+# for now the internet archive is down. Use the YouTube version, even if they are 300k, too.
+COURSE_MAP["18.06sc-2011"] = (courses.c1806scy2011.populate_video_maps_list_youtube, courses.c1806scy2011.youtube_available_true)
 
 # Maps name to YouTube downloaders
 YT_DL_MAP:dict = dict()

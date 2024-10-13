@@ -65,6 +65,43 @@ def grab_title_url_from_300k_resources_index_html(
     return ret
 
 
+def grab_html_from_resources_index_html(
+        res_bs:bs4.BeautifulSoup,
+        base_path,
+        verbose:bool
+    )-> list:
+    """
+    Given a html file of a index.html that stores 
+    a list of videos,
+
+    this function grabs the html file paths to these video pages.
+
+        Parameters:
+            res_bs: bs4 object of the html page
+            base_path: the path that the html paths are relative to
+            verbose: verbose.
+
+        Returns:
+            A list of html paths to the videos.
+            The paths will be processed to become absolute.
+    """
+    ret:list = []
+
+    # Course URL section and title section are contained in such containers
+    course_containers = res_bs.find_all("div", class_="d-inline-flex")
+
+    for c in course_containers:
+        html_section = c.find('a', class_="resource-list-title")
+        assert html_section is not None
+        relative_path = html_section["href"]
+
+        if verbose:
+            print(f"page found: {relative_path}") 
+        ret.append(base_path / relative_path)
+
+    return ret
+
+
 def grab_title_url_from_youtube_html_page(
         bs:bs4.BeautifulSoup,
         video_type:str,
