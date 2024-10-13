@@ -1,4 +1,5 @@
 import bs4
+import json
 
 def give_me_bs(path_to_html)-> bs4.BeautifulSoup:
     return bs4.BeautifulSoup(open(
@@ -63,4 +64,34 @@ def grab_title_url_from_300k_resources_index_html(
 
     return ret
 
+
+def grab_title_url_from_youtube_html_page(
+        bs:bs4.BeautifulSoup,
+        video_type:str,
+        verbose:bool
+):
+    """
+    Takes in a html page of a SINGLE youtube video,
+    returns a map of title -> url
+    """
+    title_section = bs.select("div.course-section-title-container")[0]
+    video_section = bs.find("video")
+    assert title_section is not None and video_section is not None
+    if verbose:
+        print(f"title_section is {title_section}")
+        print(f"video_section is {video_section}")
+
+    # Get the video title and video number
+    video_title:str = title_section.find("h2").get_text()
+
+    # the youtube video source data is stored in JSON
+    youtube_data_JSON:str = video_section["data-setup"]
+    yt_data_map:dict = json.loads(youtube_data_JSON)
+    src:list = yt_data_map["sources"]
+    src_0 = src[0]
+    youtube_URL:str = src_0["src"]
+
+    if verbose:
+        print(f"{video_type} found: {youtube_URL}")
+    return {video_title: youtube_URL}
 
