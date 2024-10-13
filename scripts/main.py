@@ -1,6 +1,10 @@
 import video_downloader
 import pathlib
 
+# In case the script is run on Windows, I will replace every illegal character in NTFS with #
+ILLEGAL_NTFS_CHARS = "\\/:*?\"<>|"
+ILLEGAL_CHAR_TRANS_TABLE = str.maketrans({char: '#' for char in illegal_chars})
+
 def start_download(
     video_maps: dict, 
     videos_root: pathlib.Path, 
@@ -27,7 +31,7 @@ def start_download(
                 The ADT that handles the downloading.
 
         Requires:
-            The maps is not empty; the video urls are valid.
+            The maps is not empty; the video urls are valid.({char: '#' for char in illegal_chars})
             The videos_root exists.
             downloader is valid.
 
@@ -68,11 +72,7 @@ def start_download(
             title:str
             for (title, url) in video_map.items():
                 # Replace illegal filename characters with #
-                title = title.replace('/', '#')
-                title = title.replace(':', '#')
-                title = title.replace('\"', '#')
-                title = title.replace('?', '#')
-                title = title.replace('*', '#')
+                title = title.translate(ILLEGAL_CHAR_TRANS_TABLE)
                 downloader.download(title, url, verbose)
 
 # Import courses
