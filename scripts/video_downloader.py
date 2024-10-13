@@ -83,7 +83,7 @@ class default_300k_downloader(video_downloader):
                 print(title + " has already been downloaded. Skipping...")
             return
 
-        for i in range(NUM_RETRIES):
+        for i in range(default_300k_downloader.NUM_RETRIES):
             try:
                 response = requests.get(url, stream=True)
                 response.raise_for_status()  # Check for HTTP errors
@@ -94,7 +94,9 @@ class default_300k_downloader(video_downloader):
                 filename:str = title+ext
                 
                 with open(filename, 'wb') as file:
-                    for chunk in response.iter_content(chunk_size=DEF_TRUNK_SIZE):
+                    for chunk in response.iter_content(
+                            chunk_size=default_300k_downloader.DEF_TRUNK_SIZE
+                    ):
                         file.write(chunk)
                 
                 # Success

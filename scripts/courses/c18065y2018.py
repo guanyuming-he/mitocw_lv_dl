@@ -67,7 +67,10 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
         print("video_maps_list=")
         print(video_maps_list)
 
-    return video_maps_list
+    # Recitations are to be added.
+    ret:map = {}
+    ret["Lecture"] = video_maps_list
+    return ret
 
 def youtube_available() -> bool:
     return True

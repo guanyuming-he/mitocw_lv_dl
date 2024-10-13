@@ -84,7 +84,8 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
         print("video_maps_list=")
         print(video_maps_list)
 
-    return video_maps_list
+    # Only lectures are available for this course.
+    return {"Lecture" : video_maps_list}
 
 def youtube_available() -> bool:
     return True

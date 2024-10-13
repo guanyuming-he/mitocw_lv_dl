@@ -2,25 +2,27 @@ import video_downloader
 import pathlib
 
 def start_download(
-    lecture_video_maps: list, 
-    lecture_videos_root: pathlib.Path, 
+    video_maps: dict, 
+    videos_root: pathlib.Path, 
     downloader: video_downloader.video_downloader,
     verbose:bool = False
 ) -> None:
     """
-    Download all videos in lecture_video_maps into lecture_videos_root,
+    Download all videos in video_maps into videos_root,
     creating a subdirectory for each lecture.
     The downloading will be done using downloader.
 
         Parameters:
-            lecture_video_maps (list): list of maps. 
+            video_maps (map): map of lists of tuples. 
+                Each key is the name of type of videos (e.g. "Lecture", "Recitation")
+                Each key is mapped to a list of tuples.
                 Each element in the list is a 2-tuple,
-                whose first element is the lecture number,
-                and whose second element map that maps titles to video urls for a lecture.
-                The maps are arranged in the order the lectures are given.
-            lecture_videos_root (pathlib.Path):
-                Path to the directory where the lectures
-                are going to be downloaded.
+                whose first element is the video number,
+                and whose second element is a map that maps titles to video urls. 
+                The maps are arranged in the order that the videos are given.
+            videos_root (pathlib.Path):
+                path to the directory where all the videos downloaded 
+                are to be placed in.
             downloader:
                 The ADT that handles the downloading.
 
@@ -36,48 +38,53 @@ def start_download(
             in case the scripts are executed on Windows.
             Will only output extra information if verbose=True
     """
-    if len(lecture_video_maps) == 0:
-        raise ValueError("The video maps list is empty.")
-    if not lecture_videos_root.exists() or not lecture_videos_root.is_dir():
+    if len(video_maps) == 0:
+        raise ValueError("The video maps is empty.")
+    if not videos_root.exists() or not videos_root.is_dir():
         raise ValueError("The root for videos downloaded does not exist or is not a directory.")
     if downloader is None:
         raise ValueError("The downloader is none.")
     
-    for i in range(len(lecture_video_maps)):
-        # Lecture number
-        li = lecture_video_maps[i][0]
-        # Lecture video map
-        video_map:dict = lecture_video_maps[i][1]
+    video_type:str
+    for video_type in video_maps:
+        video_type_dir = videos_root / (video_type + 's')
+        list_video_maps: list = video_maps[video_type]
+        if(not video_type_dir.exists() or not video_type_dir.is_dir()):
+            video_type_dir.mkdir(exist_ok=True)
 
-        if (verbose):
-            print("downloading videos for lecture " + str(li))
+        for (vid_num, video_map) in list_video_maps:
 
-        lecture_video_dir: pathlib.Path = lecture_videos_root / ("Lecture " + str(li))
-        # If the lecture video folder does not exist,
-        # then create it.
-        if(not lecture_video_dir.exists() or not lecture_video_dir.is_dir()):
-            lecture_video_dir.mkdir(exist_ok=True)
+            str_vn:str = str(vid_num)
+            if (verbose):
+                print(f"downloading videos for {video_type} {str_vn}")
 
-        downloader.chdir(lecture_video_dir)
+            # Videos for a session will be placed under root/video_type/number/
+            video_dir: pathlib.Path = video_type_dir / str_vn
+            if(not video_dir.exists() or not video_dir.is_dir()):
+                video_dir.mkdir(exist_ok=True)
 
-        title:str
-        for (title, url) in video_map.items():
-            # Replace illegal filename characters with #
-            title = title.replace('/', '#')
-            title = title.replace(':', '#')
-            title = title.replace('\"', '#')
-            title = title.replace('?', '#')
-            title = title.replace('*', '#')
-            downloader.download(title, url, verbose)
+            downloader.chdir(video_dir)
+
+            title:str
+            for (title, url) in video_map.items():
+                # Replace illegal filename characters with #
+                title = title.replace('/', '#')
+                title = title.replace(':', '#')
+                title = title.replace('\"', '#')
+                title = title.replace('?', '#')
+                title = title.replace('*', '#')
+                downloader.download(title, url, verbose)
 
 # Import courses
 import courses.c6004y2017
 import courses.c18065y2018
+import courses.c1806scy2011
 
 # Maps <course-number>-<year> to (populate_video_maps_list,  youtube_available)
 COURSE_MAP:dict = dict()
 COURSE_MAP["6.004-2017"] = (courses.c6004y2017.populate_video_maps_list, courses.c6004y2017.youtube_available)
 COURSE_MAP["18.065-2018"] = (courses.c18065y2018.populate_video_maps_list, courses.c18065y2018.youtube_available)
+COURSE_MAP["18.06-2011"] = (courses.c1806scy2011.populate_video_maps_list, courses.c1806scy2011.youtube_available)
 
 # Maps name to YouTube downloaders
 YT_DL_MAP:dict = dict()
@@ -104,22 +111,25 @@ STATIC_ROOT:pathlib.Path = pathlib.Path(COMMAND_ARGS[1])
 if (not STATIC_ROOT.exists() or not STATIC_ROOT.is_dir()):
     print("Invalid directory to the extracted contents.")
     exit(-1)
-LECTURE_VIDEOS_ROOT:pathlib.Path = STATIC_ROOT.parent / "lectures"
-LECTURE_VIDEOS_ROOT.mkdir(exist_ok=True)
+VIDEOS_ROOT:pathlib.Path = STATIC_ROOT.parent 
+VIDEOS_ROOT.mkdir(exist_ok=True)
 
 # find the video downloader
 downloader:video_downloader
+DL_ID:str = COMMAND_ARGS[2]
 if(COURSE_MAP[COURSE_ID_ARG][1]()): # If youtube videos are available
-    YT_DL_ID:str = COMMAND_ARGS[2]
-    if (not YT_DL_ID in YT_DL_MAP):
+    if (not DL_ID in YT_DL_MAP):
         print("Invalid downloader ID")
         exit(-1)
-    downloader = YT_DL_MAP[YT_DL_ID]
+    downloader = YT_DL_MAP[DL_ID]
 else: # youtube videos are not available. Fallback to 300k downloader
-    downloader = video_downloader,default_300k_downloader()
+    if DL_ID != "300k":
+        print("For this course only 300k videos are avialable")
+        exit(-1)
+    downloader = video_downloader.default_300k_downloader()
 
 VERBOSE:bool = str(COMMAND_ARGS[3])
 
-# Execute the download
-start_download(COURSE_VIDEO_MAPS_POPULATOR(STATIC_ROOT, VERBOSE), LECTURE_VIDEOS_ROOT, downloader, VERBOSE)
+# Execute the downloading tasks.
+start_download(COURSE_VIDEO_MAPS_POPULATOR(STATIC_ROOT, VERBOSE), VIDEOS_ROOT, downloader, VERBOSE)
 
