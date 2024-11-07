@@ -71,7 +71,7 @@ def grab_html_from_resources_index_html(
         verbose:bool
     )-> list:
     """
-    Given a html file of a index.html that stores 
+    Given a html file of a index.html from resources/ that stores 
     a list of videos,
 
     this function grabs the html file paths to these video pages.
@@ -101,6 +101,40 @@ def grab_html_from_resources_index_html(
 
     return ret
 
+
+def grab_html_from_galleries_index_html(
+        res_bs:bs4.BeautifulSoup,
+        base_path,
+        verbose:bool
+    )-> list:
+    """
+    Given a html file of a index.html from video_galleries/ that stores 
+    a list of videos,
+
+    this function grabs the html file paths to these video pages.
+
+        Parameters:
+            res_bs: bs4 object of the html page
+            base_path: the path that the html paths are relative to
+            verbose: verbose.
+
+        Returns:
+            A list of html paths to the videos.
+            The paths will be processed to become absolute.
+    """
+    ret:list = []
+
+    # Course URL section and title section are contained in such containers
+    course_containers = res_bs.find_all("a", class_="video-link")
+
+    for c in course_containers:
+        relative_path = c["href"]
+
+        if verbose:
+            print(f"page found: {relative_path}") 
+        ret.append(base_path / relative_path)
+
+    return ret
 
 def grab_title_url_from_youtube_html_page(
         bs:bs4.BeautifulSoup,

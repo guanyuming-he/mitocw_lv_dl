@@ -3,7 +3,7 @@ import pathlib
 
 # In case the script is run on Windows, I will replace every illegal character in NTFS with #
 ILLEGAL_NTFS_CHARS = "\\/:*?\"<>|"
-ILLEGAL_CHAR_TRANS_TABLE = str.maketrans({char: '#' for char in illegal_chars})
+ILLEGAL_CHAR_TRANS_TABLE = str.maketrans({char: '#' for char in ILLEGAL_NTFS_CHARS})
 
 def start_download(
     video_maps: dict, 
@@ -79,6 +79,7 @@ def start_download(
 import courses.c6004y2017
 import courses.c18065y2018
 import courses.c1806scy2011
+import courses.c6034y2010
 
 # Maps <course-number>-<year> to (populate_video_maps_list,  youtube_available)
 COURSE_MAP:dict = dict()
@@ -86,6 +87,7 @@ COURSE_MAP["6.004-2017"] = (courses.c6004y2017.populate_video_maps_list, courses
 COURSE_MAP["18.065-2018"] = (courses.c18065y2018.populate_video_maps_list, courses.c18065y2018.youtube_available)
 # for now the internet archive is down. Use the YouTube version, even if they are 300k, too.
 COURSE_MAP["18.06sc-2011"] = (courses.c1806scy2011.populate_video_maps_list_youtube, courses.c1806scy2011.youtube_available_true)
+COURSE_MAP["6.034-2010"] = (courses.c6034y2010.populate_video_maps_list, courses.c6034y2010.youtube_available)
 
 # Maps name to YouTube downloaders
 YT_DL_MAP:dict = dict()
@@ -113,7 +115,6 @@ if (not STATIC_ROOT.exists() or not STATIC_ROOT.is_dir()):
     print("Invalid directory to the extracted contents.")
     exit(-1)
 VIDEOS_ROOT:pathlib.Path = STATIC_ROOT.parent 
-VIDEOS_ROOT.mkdir(exist_ok=True)
 
 # find the video downloader
 downloader:video_downloader
