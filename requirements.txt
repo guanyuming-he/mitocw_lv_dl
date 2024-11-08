@@ -1,2 +1,4 @@
 yt-dlp
 requests
+beautifulsoup4
+bs4
