@@ -84,57 +84,65 @@ import courses.c18065y2018
 import courses.c1806scy2011
 import courses.c6034y2010
 
-# Maps <course-number>-<year> to (populate_video_maps_list,  youtube_available)
+# Maps <course-number>-<year> to the course's my_info
 COURSE_MAP:dict = dict()
-COURSE_MAP["6.004-2017"] = (courses.c6004y2017.populate_video_maps_list, courses.c6004y2017.youtube_available)
-COURSE_MAP["18.065-2018"] = (courses.c18065y2018.populate_video_maps_list, courses.c18065y2018.youtube_available)
-# for now the internet archive is down. Use the YouTube version, even if they are 300k, too.
-COURSE_MAP["18.06sc-2011"] = (courses.c1806scy2011.populate_video_maps_list_youtube, courses.c1806scy2011.youtube_available_true)
-COURSE_MAP["6.034-2010"] = (courses.c6034y2010.populate_video_maps_list, courses.c6034y2010.youtube_available)
+COURSE_MAP["6.004-2017"] = courses.c6004y2017.my_info
+COURSE_MAP["18.065-2018"] = courses.c18065y2018.my_info
+COURSE_MAP["18.06sc-2011"] = courses.c1806scy2011.my_info
+COURSE_MAP["6.034-2010"] = courses.c6034y2010.my_info
 
-# Maps name to YouTube downloaders
-YT_DL_MAP:dict = dict()
-YT_DL_MAP["yt-dlp"] = video_downloader.yt_dlp_downloader()
+# Maps name to downloaders
+DLD_MAP:dict = dict()
+DLD_MAP["yt-dlp"] = video_downloader.yt_dlp_downloader()
+DLD_MAP["300k"] = video_downloader.default_300k_downloader()
 
 # handle the command arguements
 import sys
 
-COMMAND_ARGS:list = sys.argv[1:]
+# Arguments:
+# 1. course_id 
+# 2. static resources path
+# 3. video types, separated by comma
+# 4. downloader id 
+# 5. verbose (bool)
+cmd_args:list = sys.argv[1:]
 
-if (len(COMMAND_ARGS) != 4):
+if (len(cmd_args) != 5):
     print("Invalid number of arguments.")
     exit(-1)
 
 # find the populate_video_maps_list()
-COURSE_ID_ARG:str = COMMAND_ARGS[0]
-if (not COURSE_ID_ARG in COURSE_MAP):
+course_id:str = cmd_args[0]
+if (not course_id in COURSE_MAP):
     print("Invalid course id. It is in the form of <course-number>-year")
     exit(-1)
-COURSE_VIDEO_MAPS_POPULATOR = COURSE_MAP[COURSE_ID_ARG][0]
+course_info = COURSE_MAP[course_id]
 
 # find the directory where the extracted static download is stored.
-STATIC_ROOT:pathlib.Path = pathlib.Path(COMMAND_ARGS[1])
-if (not STATIC_ROOT.exists() or not STATIC_ROOT.is_dir()):
+static_root:pathlib.Path = pathlib.Path(cmd_args[1])
+if (not static_root.exists() or not static_root.is_dir()):
     print("Invalid directory to the extracted contents.")
     exit(-1)
-VIDEOS_ROOT:pathlib.Path = STATIC_ROOT.parent 
+videos_root:pathlib.Path = static_root.parent 
+
+# parse the video types.
+vid_types = cmd_args[2].split(',')
 
 # find the video downloader
 downloader:video_downloader
-DL_ID:str = COMMAND_ARGS[2]
-if(COURSE_MAP[COURSE_ID_ARG][1]()): # If youtube videos are available
-    if (not DL_ID in YT_DL_MAP):
-        print("Invalid downloader ID")
-        exit(-1)
-    downloader = YT_DL_MAP[DL_ID]
-else: # youtube videos are not available. Fallback to 300k downloader
-    if DL_ID != "300k":
-        print("For this course only 300k videos are avialable")
-        exit(-1)
-    downloader = video_downloader.default_300k_downloader()
+dl_id:str = cmd_args[3]
+if (not dl_id in DLD_MAP):
+    print("Invalid downloader ID")
+    exit(-1)
+downloader = DLD_MAP[dl_id]
 
-VERBOSE:bool = str(COMMAND_ARGS[3])
+verbose:bool = str(cmd_args[4])
+
+# Find the video urls after checking the arguments to fail fast.
+way_to_get_videos_cls = course_info.get_way_for_downloader(dl_id)
+way_to_get_videos = way_to_get_videos_cls(static_root, dl_id)
+videos = way_to_get_videos.populate_video_maps_lists(vid_types, verbose)
 
 # Execute the downloading tasks.
-start_download(COURSE_VIDEO_MAPS_POPULATOR(STATIC_ROOT, VERBOSE), VIDEOS_ROOT, downloader, VERBOSE)
+start_download(videos, videos_root, downloader, verbose)
 

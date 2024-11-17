@@ -80,7 +80,7 @@ class course:
         # I can't know now which downloader is compatible with each course.
         self.downloader_type = downloader_type
 
-    def populate_video_maps_lists(self, types: set) -> dict:
+    def populate_video_maps_lists(self, types: set, verbose) -> dict:
         """
         Populates a dict of { vtype : list }.
         vtype: str
@@ -114,32 +114,11 @@ class course:
 
 
 # Can't start with a number, hence this awkward name.
-class three_100k_course:
+class three_100k_course(course):
     """
     All courses that have videos should have 300k bitrate videos.
     This class is for downloading them.
     """
-
-    # Only one downloader for this class.
-    __supported_downloaders = { "300k" }
-
-    # { vtype : directory name }
-    # where directory name is the directory of the resource of
-    # that video type.
-    #
-    # Theoretically, each course may have different names,
-    # So I maintain one for each course.
-    # In practice, all courses I have encountered until now
-    # follow this convention.
-    # If somehow in the future some course doesn't (e.g. because of a typo),
-    # just create another this variable in a subclass.
-    __resources = {
-        "Lecture"           : "lecture-videos",
-        "Recitation"        : "recitation-videos",
-        # Only a few courses have this. Comment it out.
-        # Let those who have it add it to this variable.
-        #"Mega-Recitation"   : "mega-recitation-videos"
-    }
 
     ####################### Static Methods ########################
 
@@ -149,11 +128,29 @@ class three_100k_course:
         -------
         The set of all supported downloaders for this way of retrieving information.
         """
-        return __supported_downloaders
+        return { "300k" }
 
     ####################### Instance Methods ########################
 
-    def __init__(self, res_path: Path, downloader_type: str):
+    def __init__(
+        self, res_path: Path, downloader_type: str,
+        # where directory name is the directory of the resource of
+        # that video type.
+        #
+        # Theoretically, each course may have different names,
+        # So I maintain one for each course.
+        # In practice, all courses I have encountered until now
+        # follow this convention.
+        # If somehow in the future some course doesn't (e.g. because of a typo),
+        # just create another this variable in a subclass.
+        resources: dict = {
+            "Lecture"           : "lecture-videos",
+            "Recitation"        : "recitation-videos",
+            # Only a few courses have this. Comment it out.
+            # Let those who have it add it to this variable.
+            #"Mega-Recitation"   : "mega-recitation-videos"
+        }
+    ):
         """
         Parameters
         ----------
@@ -162,17 +159,25 @@ class three_100k_course:
 
         downloader_type: str
             For this type of course, 300k
+
+        resources: dict of { vt : dir }
+            video type mapping to directory name.
+            In principle, this should be a static variable.
+            However, in each script run only one class
+            instance will be created anyway.
+            Hence, might as well let it be an instance variable.
         """
-        if downloader_type not in __supported_downloaders:
+        if downloader_type not in three_100k_course.get_supported_downloaders():
             raise ValueError(
                 "downloader type not supported. Supported types:" + \
-                f"{__supported_downloaders}"
+                f"{three_100k_course.get_supported_downloaders()}"
             )
 
         super().__init__(res_path, downloader_type)
 
+        self.__resources = resources
 
-    def populate_video_maps_lists(self, types: set) -> dict:
+    def populate_video_maps_lists(self, types: set, verbose) -> dict:
         """
         Populates a dict of { vtype : list }.
         vtype: str
@@ -209,15 +214,15 @@ class three_100k_course:
 
         ret: dict = {}
 
-        for t : types:
+        for t in types:
             
-            if t not in __resources:
+            if t not in self.__resources:
                 raise ValueError(
                     "The video type is not supported by this course" + \
-                    f"Supported ones: {__resources.keys()}"
+                    f"Supported ones: {self.__resources.keys()}"
                 )
 
-            ind_html_path = res_res_path / __resources[t] / "index.html"
+            ind_html_path = res_res_path / self.__resources[t] / "index.html"
             ind_bs:bs4.BeautifulSoup = helpers.give_me_bs(ind_html_path)
 
             list_vids = helpers.grab_title_url_from_300k_resources_index_html(
@@ -233,10 +238,6 @@ class three_100k_course:
         return ret
 
 
-        raise NotImplementedError("abstract method")
-
-
-
 class video_gallery_course(course):
     """
     Many courses have a dedicated video_galleries directory,
@@ -248,27 +249,6 @@ class video_gallery_course(course):
     Invariant:
         downloader_type must be "yt-dlp"
     """
-    
-    # For now, only support yt-dlp for downloading youtube videos.
-    __supported_downloaders = { "yt-dlp" }
-
-    # { vtype : directory name }
-    # where directory name is the directory of the gallery of
-    # that video type.
-    #
-    # Theoretically, each course may have different names,
-    # So I maintain one for each course.
-    # In practice, all courses I have encountered until now
-    # follow this convention.
-    # If somehow in the future some course doesn't (e.g. because of a typo),
-    # just create another this variable in a subclass.
-    __galleries = {
-        "Lecture"           : "lecture-videos",
-        "Recitation"        : "recitation-videos",
-        # Only a few courses have this. Comment it out.
-        # Let those who have it add it to this variable.
-        #"Mega-Recitation"   : "mega-recitation-videos"
-    }
 
     ####################### Static Methods ########################
 
@@ -278,11 +258,21 @@ class video_gallery_course(course):
         -------
         The set of all supported downloaders for this way of retrieving information.
         """
-        return __supported_downloaders
+        # For now, only support yt-dlp for downloading youtube videos.
+        return { "yt-dlp" }
 
     ####################### Instance Methods ########################
 
-    def __init__(self, res_path: Path, downloader_type: str):
+    def __init__(
+        self, res_path: Path, downloader_type: str,
+        galleries: dict = {
+            "Lecture"           : "lecture-videos",
+            "Recitation"        : "recitation-videos",
+            # Only a few courses have this. Comment it out.
+            # Let those who have it add it to this variable.
+            #"Mega-Recitation"   : "mega-recitation-videos"
+        }
+    ):
         """
         Parameters
         ----------
@@ -293,16 +283,35 @@ class video_gallery_course(course):
             the type of the downloader. 
             This type of courses store youtube urls in their video_galleries.
             Therefore, str cannot be "300k"
+
+        galleries: dict of { vt : dir },
+            where vt is video type, dir is directory name in the gallery directory.
+            In principle, this should be a static variable.
+            However, in each script run only one class
+            instance will be created anyway.
+            Hence, might as well let it be an instance variable.
         """
-        if downloader_type not in __supported_downloaders:
+        if downloader_type not in video_gallery_course.get_supported_downloaders():
             raise ValueError(
                 "downloader type not supported. Supported types:" + \
-                f"{__supported_downloaders}"
+                f"{video_gallery_course.get_supported_downloaders()}"
             )
 
         super().__init__(res_path, downloader_type)
 
-    def populate_video_maps_lists(self, types: set) -> dict:
+        # { vtype : directory name }
+        # where directory name is the directory of the gallery of
+        # that video type.
+        #
+        # Theoretically, each course may have different names,
+        # So I maintain one for each course.
+        # In practice, all courses I have encountered until now
+        # follow this convention.
+        # If somehow in the future some course doesn't (e.g. because of a typo),
+        # just create another this variable in a subclass.
+        self.__galleries = galleries
+
+    def populate_video_maps_lists(self, types: set, verbose) -> dict:
         """
         Populates a dict of { vtype : list }.
         vtype: str
@@ -339,15 +348,15 @@ class video_gallery_course(course):
 
         ret: dict = {}
 
-        for t : types:
+        for t in types:
             
-            if t not in __galleries:
+            if t not in self.__galleries:
                 raise ValueError(
                     "The video type is not supported by this course" + \
-                    f"Supported ones: {__galleries.keys()}"
+                    f"Supported ones: {self.__galleries.keys()}"
                 )
 
-            ind_html_path = galleries_path / __galleries[t] / "index.html"
+            ind_html_path = galleries_path / self.__galleries[t] / "index.html"
             ind_bs:bs4.BeautifulSoup = helpers.give_me_bs(ind_html_path)
 
             # Get the html pages of the videos.
@@ -390,8 +399,8 @@ class course_info:
         self.ls_ways = ls_ways
         assert len(ls_ways) > 0
 
-        self.downloaders:set = {}
-        self.map_dld_ways:dict = {}
+        self.downloaders:set = set()
+        self.map_dld_ways:dict = dict()
 
         for w in ls_ways:
             if not issubclass(w, course):

@@ -1,8 +1,22 @@
 import pathlib
 import bs4
 import re
-from . import helpers
 
+from . import helpers
+from . import course
+
+class c18065_gallery(course.video_gallery_course):
+
+    def __init__(self, res_path: pathlib.Path, downloader_type: str):
+        super().__init__(
+            res_path, downloader_type,
+            { "Lecture" : "video-lectures" }
+        )
+
+my_info = course.course_info([course.three_100k_course, c18065_gallery])
+
+
+"""
 LEC_RE_OBJ = re.compile(r"Lecture ([\d]+)")
 REC_RE_OBJ = re.compile(r"Recitation ([\d]+)")
 
@@ -60,3 +74,4 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
 
 def youtube_available() -> bool:
     return True
+"""

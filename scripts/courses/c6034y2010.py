@@ -1,9 +1,23 @@
 import pathlib
 import bs4
 import json
+
 from . import helpers
+from . import course
 
 
+class c6034_gallery(course.video_gallery_course):
+
+    __galleries = {
+        "Lecture"           : "lecture-videos",
+        "Mega-Recitation"   : "mega-recitation-videos"
+    }
+
+
+my_info = course.course_info([course.three_100k_course, c6034_gallery])
+
+
+"""
 def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = False) -> dict:
 
     if(not static_root_path.exists() or not static_root_path.is_dir()):
@@ -66,4 +80,4 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
 
 def youtube_available() -> bool:
     return True
-
+"""

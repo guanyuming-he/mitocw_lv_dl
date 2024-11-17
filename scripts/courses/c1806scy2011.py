@@ -1,8 +1,15 @@
 import pathlib
 import bs4
 import json
-from . import helpers
 
+from . import helpers
+from . import course
+
+my_info = course.course_info(
+    [course.three_100k_course, course.video_gallery_course]
+)
+
+"""
 def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = False) -> list:
 
     if(not static_root_path.exists() or not static_root_path.is_dir()):
@@ -109,3 +116,4 @@ def youtube_available() -> bool:
 def youtube_available_true() -> bool:
     # For this moment, the Internet Archive is down. But I still need the videos.
     return True
+"""
