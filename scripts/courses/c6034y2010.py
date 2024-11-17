@@ -4,7 +4,7 @@ import json
 from . import helpers
 
 
-def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = False) -> list:
+def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = False) -> dict:
 
     if(not static_root_path.exists() or not static_root_path.is_dir()):
         raise ValueError("static_root_path does not exist or is not a directory.")
@@ -58,7 +58,7 @@ def populate_video_maps_list(static_root_path: pathlib.Path, verbose:bool = Fals
         (i+1, list_rec_vids[i]) for i in range(len(list_rec_vids))
     ]
 
-    ret:map = {}
+    ret:dict = {}
     ret["Lecture"] = list_lec_vids
     ret["Mega-Recitation"] = list_rec_vids
     return ret

@@ -13,17 +13,16 @@ def start_download(
 ) -> None:
     """
     Download all videos in video_maps into videos_root,
-    creating a subdirectory for each lecture.
+    creating a subdirectory for each lecture/reitation/etc.
     The downloading will be done using downloader.
 
         Parameters:
             video_maps (map): map of lists of tuples. 
                 Each key is the name of type of videos (e.g. "Lecture", "Recitation")
-                Each key is mapped to a list of tuples.
-                Each element in the list is a 2-tuple,
-                whose first element is the video number,
-                and whose second element is a map that maps titles to video urls. 
-                The maps are arranged in the order that the videos are given.
+                Each key is mapped to a list of tuples (num, url_map).
+                where num is the video number,
+                and url_map is a map that maps titles to video urls. 
+                Each map is arranged in the order that the videos are given.
             videos_root (pathlib.Path):
                 path to the directory where all the videos downloaded 
                 are to be placed in.
@@ -31,7 +30,7 @@ def start_download(
                 The ADT that handles the downloading.
 
         Requires:
-            The maps is not empty; the video urls are valid.({char: '#' for char in illegal_chars})
+            The maps is not empty; the video urls are valid.
             The videos_root exists.
             downloader is valid.
 
@@ -43,15 +42,19 @@ def start_download(
             Will only output extra information if verbose=True
     """
     if len(video_maps) == 0:
-        raise ValueError("The video maps is empty.")
+        raise ValueError("The list of video maps is empty.")
     if not videos_root.exists() or not videos_root.is_dir():
         raise ValueError("The root for videos downloaded does not exist or is not a directory.")
     if downloader is None:
         raise ValueError("The downloader is none.")
     
+    # Type of the video, e.g. "Lecture", "Recitation".
     video_type:str
     for video_type in video_maps:
+        # Add 's' to mean plural form.
         video_type_dir = videos_root / (video_type + 's')
+
+        # list of video maps for the video_type.
         list_video_maps: list = video_maps[video_type]
         if(not video_type_dir.exists() or not video_type_dir.is_dir()):
             video_type_dir.mkdir(exist_ok=True)
