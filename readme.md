@@ -1,3 +1,30 @@
+# Usage
+```
+python(3) main.py <course-id> <path-course-content> <video-types> <downloader> <verbose>
+```
+- `course-id` Identifier of the course. For now, it supports
+    + 6.004-2017
+    + 18.065-2018
+    + 18.06sc-2011
+    + 6.034-2010
+- `path-course-content` Path to the static course contents that
+  you downloaded from MIT OCW.
+- `video_type` Video types to download, separated by comma. For example,
+  `Lecture, Recitation`. Usually a course only have these two video types.
+- `downloader` The downloader to use to download the course videos.
+  For now, only two are supported:
+    + `yt-dlp`: Downloads the course videos from YouTube, usually have 
+    better quality than `300k`.
+    + `300k`: Downloads the 300k bitrate videos from the Internet Archive.
+    Since the bitrate is low, usually they have worse quality than the
+    YouTube videos.
+-  `verbose`. Outputs more information iff it is True.
+
+## Example
+```
+python3 main.py "18.065-2018" ~/Videos/18.065-2018/static "Lecture" yt-dlp True
+```
+
 # Introduction
 MIT OCW is a great platform of free and high-quality educational resources.
 From each course there, one can download a bundled course resources, which includes the 
