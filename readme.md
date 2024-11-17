@@ -8,7 +8,9 @@ python(3) main.py <course-id> <path-course-content> <video-types> <downloader> <
     + 18.06sc-2011
     + 6.034-2010
 - `path-course-content` Path to the static course contents that
-  you downloaded from MIT OCW.
+  you downloaded from MIT OCW. This does not include the videos,
+  but which has the HTML pages that the scripts will scrape to download
+  the videos.
 - `video_type` Video types to download, separated by comma. For example,
   `Lecture, Recitation`. Usually a course only have these two video types.
 - `downloader` The downloader to use to download the course videos.
