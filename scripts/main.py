@@ -56,8 +56,7 @@ def start_download(
 
         # list of video maps for the video_type.
         list_video_maps: list = video_maps[video_type]
-        if(not video_type_dir.exists() or not video_type_dir.is_dir()):
-            video_type_dir.mkdir(exist_ok=True)
+        video_type_dir.mkdir(exist_ok=True)
 
         for (vid_num, video_map) in list_video_maps:
 

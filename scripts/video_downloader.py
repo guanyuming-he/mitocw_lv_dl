@@ -92,8 +92,9 @@ class default_300k_downloader(video_downloader):
                 ext:str = url[url.rindex('.'):] # Extension is from the last '.' in the url to the end
                 # rindex() will raise an Exception if it can not be found, so I don't have to.
                 filename:str = title+ext
+                filepath:pathlib.Path = self._dir / filename
                 
-                with open(filename, 'wb') as file:
+                with open(filepath, 'wb') as file:
                     for chunk in response.iter_content(
                             chunk_size=default_300k_downloader.DEF_TRUNK_SIZE
                     ):
@@ -101,13 +102,13 @@ class default_300k_downloader(video_downloader):
                 
                 # Success
                 if verbose:
-                    print(f"Downloaded 300k video to {filename}")
+                    print(f"Downloaded {filename}")
                 # and don't forget to update the filenames set
                 self._dir_filenames.add(title)
                 break
 
             except Exception as e:
                 if verbose:
-                    print("An error occurred while downloading. Retrying...")
+                    print(f"An error occurred while downloading. Retry number {i+1}.")
                 continue
 
