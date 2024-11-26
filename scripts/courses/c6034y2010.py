@@ -8,10 +8,28 @@ from . import course
 
 class c6034_gallery(course.video_gallery_course):
 
-    __galleries = {
-        "Lecture"           : "lecture-videos",
-        "Mega-Recitation"   : "mega-recitation-videos"
-    }
+    def __init__(
+        self, res_path: pathlib.Path, downloader_type: str,
+    ):
+        """
+        Parameters
+        ----------
+        res_path: Path
+            a path to the static resources of the course.
+
+        downloader_type: str
+            the type of the downloader. 
+            This type of courses store youtube urls in their video_galleries.
+            Therefore, str cannot be "300k"
+
+        """
+        super().__init__(
+            res_path, downloader_type,
+            {
+                "Lecture"           : "lecture-videos",
+                "Mega-Recitation"   : "mega-recitation-videos"
+            }
+        )
 
 
 my_info = course.course_info([course.three_100k_course, c6034_gallery])
