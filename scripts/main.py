@@ -82,6 +82,8 @@ import courses.c6004y2017
 import courses.c18065y2018
 import courses.c1806scy2011
 import courses.c6034y2010
+import courses.c6858y2014
+import courses.fmsd_hehner
 
 # Maps <course-number>-<year> to the course's my_info
 COURSE_MAP:dict = dict()
@@ -89,6 +91,8 @@ COURSE_MAP["6.004-2017"] = courses.c6004y2017.my_info
 COURSE_MAP["18.065-2018"] = courses.c18065y2018.my_info
 COURSE_MAP["18.06sc-2011"] = courses.c1806scy2011.my_info
 COURSE_MAP["6.034-2010"] = courses.c6034y2010.my_info
+COURSE_MAP["6.858-2014"] = courses.c6858y2014.my_info
+COURSE_MAP["fmsd_hehner"] = courses.fmsd_hehner.my_info
 
 # Maps name to downloaders
 DLD_MAP:dict = dict()

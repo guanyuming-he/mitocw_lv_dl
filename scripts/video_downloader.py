@@ -4,6 +4,8 @@ import os.path
 import pathlib
 import requests
 
+from courses import helpers
+
 class video_downloader:
 
     def __init__(self, base_path: pathlib.Path|None):
@@ -83,32 +85,26 @@ class default_300k_downloader(video_downloader):
                 print(title + " has already been downloaded. Skipping...")
             return
 
-        for i in range(default_300k_downloader.NUM_RETRIES):
-            try:
-                response = requests.get(url, stream=True)
-                response.raise_for_status()  # Check for HTTP errors
+        # calculate the file name.
+        ext:str = url[url.rindex('.'):] # Extension is from the last '.' in the url to the end
+        # rindex() will raise an Exception if it can not be found, so I don't have to.
+        file_name:str = title+ext
+        file_path:pathlib.Path = self._dir / file_name
 
-                # calculate the file name.
-                ext:str = url[url.rindex('.'):] # Extension is from the last '.' in the url to the end
-                # rindex() will raise an Exception if it can not be found, so I don't have to.
-                filename:str = title+ext
-                filepath:pathlib.Path = self._dir / filename
-                
-                with open(filepath, 'wb') as file:
-                    for chunk in response.iter_content(
-                            chunk_size=default_300k_downloader.DEF_TRUNK_SIZE
-                    ):
-                        file.write(chunk)
-                
-                # Success
-                if verbose:
-                    print(f"Downloaded {filename}")
-                # and don't forget to update the filenames set
-                self._dir_filenames.add(title)
-                break
+        # download the file
+        success = helpers.download_file_over_http(
+            url,
+            file_path,
+            default_300k_downloader.DEF_TRUNK_SIZE,
+            default_300k_downloader.NUM_RETRIES,
+            verbose
+        )
 
-            except Exception as e:
-                if verbose:
-                    print(f"An error occurred while downloading. Retry number {i+1}.")
-                continue
-
+        if success:
+            # and don't forget to update the filenames set
+            self._dir_filenames.add(title)
+        else:
+            # the error will be printed by 
+            # download_file_over_http
+            # nothing to do here.
+            return

@@ -7,6 +7,7 @@ python(3) main.py <course-id> <path-course-content> <video-types> <downloader> <
     + 18.065-2018
     + 18.06sc-2011
     + 6.034-2010
+    + 6.858-2014
 - `path-course-content` Path to the static course contents that
   you downloaded from MIT OCW. This does not include the videos,
   but which has the HTML pages that the scripts will scrape to download
@@ -31,16 +32,20 @@ python3 scripts/main.py "18.065-2018" ~/Videos/18.065-2018/static "Lecture" yt-d
 Currently, I put some scripts that download open courses from other universities here, too,
 because they may reuse some of the code here.
 
-However, their architecture may be significantly different from those on MIT OCW. Hence,
-I put those scripts as standalone `.py` files. And you will need to call them individually.
+However, since their websites don't necessarily share the same architecture as the MIT
+OCW ones, you should only download them using the following commands:
 
-For now, I only have one such script: `./scripts/dl_toronto_fmsd.py`,
+For now, I only have one such script: `./scripts/courses/fmsd_hehner.py`,
 which downloads the Lectures, Transcripts, and Slides of the FMSD course 
 by Prof. Hehner at the University of Toronto. To use it, execute
 ```
-python3 scripts/dl_toronto_fmsd.py <root_dir> <verbose>
+python3 scripts/main.py <sub_dir_of_root> "fmsd_hehner" <res-types> "300k" <verbose>
 ```
-, where `root_dir` is the place that you want to place the downloaded files.
+, where 
+- `sub_dir_of_root` is a **sub** directory of the directory where you want the files to be downloaded to.
+This strange restriction is because I reuse the code where this argument would be the dir to the static course content.
+- `res-types` can be any subset of `{ "Lecture", "Slide", "Transcript" }`.
+- `verbose` same as above.
 
 # Introduction
 MIT OCW is a great platform of free and high-quality educational resources.

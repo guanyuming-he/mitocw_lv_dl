@@ -1,5 +1,7 @@
 import bs4
 import json
+import pathlib
+import requests
 
 def give_me_bs(path_to_html)-> bs4.BeautifulSoup:
     return bs4.BeautifulSoup(open(
@@ -83,7 +85,7 @@ def grab_html_from_resources_index_html(
 
         Returns:
             A list of html paths to the videos.
-            The paths will be processed to become absolute.
+The paths will be processed to become absolute.
     """
     ret:list = []
 
@@ -165,4 +167,61 @@ def grab_title_url_from_youtube_html_page(
     if verbose:
         print(f"{video_type} found: {youtube_URL}")
     return {video_title: youtube_URL}
+
+
+def download_file_over_http(
+    url: str,
+    file_path: pathlib.Path,
+    chunk_size: int = 16*1024,
+    num_retries: int = 8,
+    verbose: bool = False
+) -> bool:
+    """
+    Downloads a file over HTTP from url,
+    to the file pointed to by file_path.
+
+    Parameters
+    ----------
+    url : str
+        HTTP url to the file.
+    file_path : Path
+        path to an entry to a directory in the file system.
+        The entry may or may not exist, but the directory
+        that contains it must exist.
+    chunk_size : int, optional
+        size of the chunk that is transfered at once
+        over the network.
+    num_retries : int, optional
+        number of retries before a final failure.
+    verbose : bool, optional
+        Will print the retries iff True.
+
+    Returns
+    -------
+    bool
+        True iff the downloading was successful.
+    """
+    for i in range(num_retries):
+        try:
+            response = requests.get(url, stream=True)
+            response.raise_for_status()  # Check for HTTP errors
+
+            with open(file_path, 'wb') as file:
+                for chunk in response.iter_content(
+                    chunk_size=chunk_size
+                ):
+                    file.write(chunk)
+            
+            # Success
+            return True
+
+        except Exception as e:
+            if verbose:
+                print(f"An error occurred while downloading from {url}:")
+                print(e)
+                print(f"Retry number {i+1}.")
+            continue
+
+    # all retries have failed
+    return False
 
