@@ -13,7 +13,9 @@ python(3) main.py <course-id> <path-course-content> <video-types> <downloader> <
   but which has the HTML pages that the scripts will scrape to download
   the videos.
 - `video_type` Video types to download, separated by comma. For example,
-  `Lecture, Recitation`. Usually a course only have these two video types.
+  `Lecture,Recitation`. Usually a course only have these two video types.
+  Note that the comma must immediately follow the previous item and immediately
+  precede the next item.
 - `downloader` The downloader to use to download the course videos.
   For now, only two are supported:
     + `yt-dlp`: Downloads the course videos from YouTube, usually have 
@@ -44,8 +46,9 @@ python3 scripts/main.py <sub_dir_of_root> "fmsd_hehner" <res-types> "300k" <verb
 , where 
 - `sub_dir_of_root` is a **sub** directory of the directory where you want the files to be downloaded to.
 This strange restriction is because I reuse the code where this argument would be the dir to the static course content.
-- `res-types` can be any subset of `{ "Lecture", "Slide", "Transcript" }`.
-- `verbose` same as above.
+- `res-types` can be any subset of `{ "Lecture", "Slide", "Transcript" }`. Put a comma between two,
+  as described above in the main usage.
+- `verbose` same as above in the main usage.
 
 # Introduction
 MIT OCW is a great platform of free and high-quality educational resources.
