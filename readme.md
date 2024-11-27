@@ -41,7 +41,7 @@ For now, I only have one such script: `./scripts/courses/fmsd_hehner.py`,
 which downloads the Lectures, Transcripts, and Slides of the FMSD course 
 by Prof. Hehner at the University of Toronto. To use it, execute
 ```
-python3 scripts/main.py <sub_dir_of_root> "fmsd_hehner" <res-types> "300k" <verbose>
+python3 scripts/main.py "fmsd_hehner" <sub_dir_of_root> <res-types> "300k" <verbose>
 ```
 , where 
 - `sub_dir_of_root` is a **sub** directory of the directory where you want the files to be downloaded to.
