@@ -8,6 +8,7 @@ python(3) main.py <course-id> <path-course-content> <video-types> <downloader> <
     + 18.06sc-2011
     + 6.034-2010
     + 6.858-2014
+    + 6.868j-2011
 - `path-course-content` Path to the static course contents that
   you downloaded from MIT OCW. This does not include the videos,
   but which has the HTML pages that the scripts will scrape to download
